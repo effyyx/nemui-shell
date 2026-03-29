@@ -57,39 +57,13 @@ Singleton {
     function apply(wallpaper) {
         root.currentWallpaper = wallpaper.path
         root.walApplying = true
-
-        if (isVideo(wallpaper.path)) {
-            applyWallProc.command = ["bash", "-c",
-                // Extract frame first while anything is still visible (no grey yet)
-                "ffmpeg -y -ss 1 -i '" + wallpaper.path + "' -pix_fmt yuvj420p -frames:v 1 -update 1 -q:v 2 /tmp/qs-video-frame.jpg 2>/dev/null; " +
-                "if pgrep mpvpaper >/dev/null 2>&1 && [ -S /tmp/mpvpaper.sock ]; then " +
-                // IPC path: load still frame first to bridge the grey, then load video
-                "    echo '{\"command\":[\"loadfile\",\"/tmp/qs-video-frame.jpg\"]}' | socat - /tmp/mpvpaper.sock; " +
-                "    sleep 0.25; " +
-                "    echo '{\"command\":[\"loadfile\",\"" + wallpaper.path + "\"]}' | socat - /tmp/mpvpaper.sock; " +
-                "else " +
-                // Fresh start: show frame on DP-1 via swww as bridge, then start mpvpaper on top
-                "    pkill mpvpaper 2>/dev/null; " +
-                "    pgrep swww-daemon >/dev/null 2>&1 || (swww-daemon & sleep 0.3); " +
-                "    swww img /tmp/qs-video-frame.jpg --outputs DP-1 --transition-type none 2>/dev/null; " +
-                "    sleep 0.1; " +
-                "    mpvpaper -o '--no-config --loop=inf --no-audio --panscan=1.0 --hwdec=auto --input-ipc-server=/tmp/mpvpaper.sock' DP-1 '" + wallpaper.path + "' >/dev/null 2>&1 & " +
-                "fi; " +
-                "pgrep swww-daemon >/dev/null 2>&1 || (swww-daemon & sleep 0.3); " +
-                "swww img /tmp/qs-video-frame.jpg --outputs DP-2 2>/dev/null & " +
-                "matugen image /tmp/qs-video-frame.jpg --source-color-index 0 & " +
-                "ln -sf '" + wallpaper.path + "' '" + Config.wallpaperDir + "/current'"
-            ]
-        } else {
-            applyWallProc.command = ["bash", "-c",
-                "pkill mpvpaper 2>/dev/null; " +
-                "pgrep swww-daemon >/dev/null 2>&1 || (swww-daemon & sleep 0.5); " +
-                "ln -sf '" + wallpaper.path + "' '" + Config.wallpaperDir + "/current' && " +
-                "swww img '" + wallpaper.path + "' --transition-type any --transition-duration 2 & " +
-                "matugen image '" + wallpaper.path + "' --source-color-index 0 && " +
-                "sleep 0.3"
-            ]
-        }
+        applyWallProc.command = ["bash", "-c",
+            "pgrep swww-daemon >/dev/null 2>&1 || (swww-daemon & sleep 0.5); " +
+            "ln -sf '" + wallpaper.path + "' '" + Config.wallpaperDir + "/current' && " +
+            "swww img '" + wallpaper.path + "' --transition-type any --transition-duration 2 & " +
+            "matugen image '" + wallpaper.path + "' --source-color-index 0 && " +
+            "sleep 0.3"
+        ]
         applyWallProc.running = true
     }
 
