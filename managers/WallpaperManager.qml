@@ -58,9 +58,9 @@ Singleton {
         root.currentWallpaper = wallpaper.path
         root.walApplying = true
         applyWallProc.command = ["bash", "-c",
-            "pgrep swww-daemon >/dev/null 2>&1 || (swww-daemon & sleep 0.5); " +
+            "pgrep awww-daemon >/dev/null 2>&1 || (awww-daemon & sleep 0.5); " +
             "ln -sf '" + wallpaper.path + "' '" + Config.wallpaperDir + "/current' && " +
-            "swww img '" + wallpaper.path + "' --transition-type any --transition-duration 2 & " +
+            "awww img '" + wallpaper.path + "' --transition-type any --transition-duration 2 & " +
             "matugen image '" + wallpaper.path + "' --source-color-index 0 && " +
             "sleep 0.3"
         ]
