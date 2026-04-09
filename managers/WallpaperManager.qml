@@ -164,7 +164,10 @@ Singleton {
 
     Process {
         id: applyWallProc
-        onExited: {
+        stderr: SplitParser { onRead: data => console.error("[applyWallProc]", data) }
+        stdout: SplitParser { onRead: data => console.log("[applyWallProc]", data) }
+        onExited: code => {
+            console.log("[applyWallProc] exited:", code)
             matugenColorsProc.running = true
             walStepMako.running = true
         }
