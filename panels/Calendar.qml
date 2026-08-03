@@ -44,6 +44,21 @@ PanelWindow {
 
         readonly property var monthNames: ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"]
 
+        // Japanese public holidays; update this table when adding a new year.
+        readonly property var holidays: ({
+            "2026-01-01":"元日", "2026-01-12":"成人の日", "2026-02-11":"建国記念の日", "2026-02-23":"天皇誕生日", "2026-03-20":"春分の日", "2026-04-29":"昭和の日", "2026-05-03":"憲法記念日", "2026-05-04":"みどりの日", "2026-05-05":"こどもの日", "2026-05-06":"振替休日", "2026-07-20":"海の日", "2026-08-11":"山の日", "2026-09-21":"敬老の日", "2026-09-22":"国民の休日", "2026-09-23":"秋分の日", "2026-10-12":"スポーツの日", "2026-11-03":"文化の日", "2026-11-23":"勤労感謝の日",
+            "2027-01-01":"元日", "2027-01-11":"成人の日", "2027-02-11":"建国記念の日", "2027-02-23":"天皇誕生日", "2027-03-21":"春分の日", "2027-03-22":"振替休日", "2027-04-29":"昭和の日", "2027-05-03":"憲法記念日", "2027-05-04":"みどりの日", "2027-05-05":"こどもの日", "2027-07-19":"海の日", "2027-08-11":"山の日", "2027-09-20":"敬老の日", "2027-09-23":"秋分の日", "2027-10-11":"スポーツの日", "2027-11-03":"文化の日", "2027-11-23":"勤労感謝の日",
+            "2028-01-01":"元日", "2028-01-02":"振替休日", "2028-01-10":"成人の日", "2028-02-11":"建国記念の日", "2028-02-23":"天皇誕生日", "2028-03-20":"春分の日", "2028-04-29":"昭和の日", "2028-04-30":"振替休日", "2028-05-03":"憲法記念日", "2028-05-04":"みどりの日", "2028-05-05":"こどもの日", "2028-07-17":"海の日", "2028-08-11":"山の日", "2028-09-18":"敬老の日", "2028-09-22":"秋分の日", "2028-10-09":"スポーツの日", "2028-11-03":"文化の日", "2028-11-23":"勤労感謝の日",
+            "2029-01-01":"元日", "2029-01-08":"成人の日", "2029-02-11":"建国記念の日", "2029-02-12":"振替休日", "2029-02-23":"天皇誕生日", "2029-03-20":"春分の日", "2029-04-29":"昭和の日", "2029-04-30":"振替休日", "2029-05-03":"憲法記念日", "2029-05-04":"みどりの日", "2029-05-05":"こどもの日", "2029-07-16":"海の日", "2029-08-11":"山の日", "2029-09-17":"敬老の日", "2029-09-23":"秋分の日", "2029-09-24":"振替休日", "2029-10-08":"スポーツの日", "2029-11-03":"文化の日", "2029-11-23":"勤労感謝の日",
+            "2030-01-01":"元日", "2030-01-14":"成人の日", "2030-02-11":"建国記念の日", "2030-02-23":"天皇誕生日", "2030-03-20":"春分の日", "2030-04-29":"昭和の日", "2030-05-03":"憲法記念日", "2030-05-04":"みどりの日", "2030-05-05":"こどもの日", "2030-05-06":"振替休日", "2030-07-15":"海の日", "2030-08-11":"山の日", "2030-08-12":"振替休日", "2030-09-16":"敬老の日", "2030-09-23":"秋分の日", "2030-10-14":"スポーツの日", "2030-11-03":"文化の日", "2030-11-04":"振替休日", "2030-11-23":"勤労感謝の日"
+        })
+
+        function holidayName(day) {
+            if (day < 1) return ""
+            var key = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0")
+            return holidays[key] || ""
+        }
+
         // ── weather ───────────────────────────────────────────────────────
         property var    forecastDays:    []
         property double lastFetchTime:   0
@@ -157,13 +172,23 @@ PanelWindow {
                     Rectangle {
                         width: calGrid.cellW; height: calGrid.cellW; radius: width / 2
                         property int  dayNum:  calGrid.days[index]
+                        property string holiday: calRoot.holidayName(dayNum)
                         property bool isToday: dayNum > 0 && dayNum === calRoot.todayDay && calRoot.viewMonth === calRoot.todayMonth && calRoot.viewYear === calRoot.todayYear
                         color: isToday ? Qt.rgba(WallpaperManager.walColor5.r, WallpaperManager.walColor5.g, WallpaperManager.walColor5.b, 0.25) : "transparent"
                         border.color: isToday ? WallpaperManager.walColor5 : "transparent"; border.width: 1
                         Text {
                             anchors.centerIn: parent; text: dayNum > 0 ? dayNum : ""
+                            anchors.verticalCenterOffset: parent.holiday ? -5 : 0
                             font.pixelSize: 13; font.family: "Hiragino Sans"; font.weight: parent.isToday ? Font.Bold : Font.Normal
-                            color: parent.isToday ? WallpaperManager.walColor5 : WallpaperManager.walForeground
+                            color: parent.isToday ? WallpaperManager.walColor5 : parent.holiday ? "#e57373" : WallpaperManager.walForeground
+                        }
+                        Text {
+                            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; bottomMargin: 2 }
+                            text: parent.holiday
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideRight
+                            font.pixelSize: 7; font.family: "Hiragino Sans"
+                            color: "#e57373"
                         }
                     }
                 }
