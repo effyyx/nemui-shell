@@ -53,6 +53,12 @@ PanelWindow {
             "2030-01-01":"元日", "2030-01-14":"成人の日", "2030-02-11":"建国記念の日", "2030-02-23":"天皇誕生日", "2030-03-20":"春分の日", "2030-04-29":"昭和の日", "2030-05-03":"憲法記念日", "2030-05-04":"みどりの日", "2030-05-05":"こどもの日", "2030-05-06":"振替休日", "2030-07-15":"海の日", "2030-08-11":"山の日", "2030-08-12":"振替休日", "2030-09-16":"敬老の日", "2030-09-23":"秋分の日", "2030-10-14":"スポーツの日", "2030-11-03":"文化の日", "2030-11-04":"振替休日", "2030-11-23":"勤労感謝の日"
         })
 
+        readonly property var observances: ({
+            "01-01":"元日", "02-14":"バレンタインデー", "03-14":"ホワイトデー",
+            "07-07":"七夕", "10-31":"ハロウィン", "12-24":"クリスマス・イブ",
+            "12-25":"クリスマス", "12-31":"大晦日"
+        })
+
         readonly property var holidayDescriptions: ({
             "元日":"年のはじめを祝う日",
             "成人の日":"大人になった青年を祝い、励ます日",
@@ -71,22 +77,39 @@ PanelWindow {
             "文化の日":"自由と平和を愛し、文化をすすめる日",
             "勤労感謝の日":"勤労を尊び、生産を祝い、互いに感謝する日",
             "振替休日":"日曜日の祝日の代わりに設けられる休日",
-            "国民の休日":"祝日に挟まれた平日に設けられる休日"
+            "国民の休日":"祝日に挟まれた平日に設けられる休日",
+            "バレンタインデー":"恋人や大切な人に気持ちを伝える日",
+            "ホワイトデー":"バレンタインデーのお返しをする日",
+            "七夕":"短冊に願いを書き、星に祈る日",
+            "ハロウィン":"仮装やお菓子を楽しむ行事",
+            "クリスマス・イブ":"クリスマスの前夜。家族や友人と過ごす日",
+            "クリスマス":"イエス・キリストの誕生を祝う日",
+            "大晦日":"一年の最後の日。新年を迎える準備をする日"
         })
+
+        function dateKey(day) {
+            return viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0")
+        }
 
         function holidayName(day) {
             if (day < 1) return ""
-            var key = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0")
-            return holidays[key] || ""
+            return holidays[dateKey(day)] || ""
         }
 
-        function holidayType(name) {
+        function eventName(day) {
+            if (day < 1) return ""
+            return holidayName(day) || observances[String(viewMonth + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0")] || ""
+        }
+
+        function holidayType(day, name) {
+            if (!holidays[dateKey(day)]) return "文化・行事"
             if (name === "振替休日") return "振替休日"
             if (name === "国民の休日") return "国民の休日"
             return "国民の祝日"
         }
 
-        function holidayColor(name) {
+        function holidayColor(day, name) {
+            if (!holidays[dateKey(day)]) return "#ba68c8"
             return name === "振替休日" || name === "国民の休日"
                 ? "#ffb74d" : "#e57373"
         }
@@ -97,7 +120,7 @@ PanelWindow {
             var p = cell.mapToItem(calRoot, 0, cell.height)
             selectedHoliday = {
                 name: cell.holiday,
-                type: holidayType(cell.holiday),
+                type: holidayType(cell.dayNum, cell.holiday),
                 description: holidayDescriptions[cell.holiday] || "",
                 date: viewYear + "年" + (viewMonth + 1) + "月" + cell.dayNum + "日"
             }
@@ -219,8 +242,8 @@ PanelWindow {
                     Rectangle {
                         width: calGrid.cellW; height: calGrid.cellW; radius: width / 2
                         property int  dayNum:  calGrid.days[index]
-                        property string holiday: calRoot.holidayName(dayNum)
-                        property color holidayAccent: calRoot.holidayColor(holiday)
+                        property string holiday: calRoot.eventName(dayNum)
+                        property color holidayAccent: calRoot.holidayColor(dayNum, holiday)
                         property bool isToday: dayNum > 0 && dayNum === calRoot.todayDay && calRoot.viewMonth === calRoot.todayMonth && calRoot.viewYear === calRoot.todayYear
                         color: isToday ? Qt.rgba(WallpaperManager.walColor5.r, WallpaperManager.walColor5.g, WallpaperManager.walColor5.b, 0.25) : "transparent"
                         border.color: isToday ? WallpaperManager.walColor5 : "transparent"; border.width: 1
