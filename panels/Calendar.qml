@@ -54,13 +54,27 @@ PanelWindow {
         })
 
         readonly property var observances: ({
-            "01-01":"元日", "02-14":"バレンタインデー", "03-14":"ホワイトデー",
+            "01-01":"元日", "02-03":"節分", "02-14":"バレンタインデー", "03-03":"ひな祭り", "03-14":"ホワイトデー",
             "07-07":"七夕", "10-31":"ハロウィン", "12-24":"クリスマス・イブ",
-            "12-25":"クリスマス", "12-31":"大晦日"
+            "11-15":"七五三", "12-25":"クリスマス", "12-31":"大晦日"
         })
+
+        readonly property var observanceRanges: [
+            { start: "08-13", end: "08-16", name: "お盆" }
+        ]
+
+        readonly property var tokyoEvents: [
+            { start: "2026-05-15", end: "2026-05-17", name: "三社祭" },
+            { start: "2026-06-07", end: "2026-06-16", name: "山王祭" },
+            { start: "2026-07-11", end: "2026-07-26", name: "Vket 2026 Summer" },
+            { start: "2026-07-25", end: "2026-07-25", name: "隅田川花火大会" },
+            { start: "2026-08-15", end: "2026-08-16", name: "コミックマーケット108" },
+            { start: "2026-09-17", end: "2026-09-21", name: "東京ゲームショウ2026" }
+        ]
 
         readonly property var holidayDescriptions: ({
             "元日":"年のはじめを祝う日",
+            "節分":"季節の変わり目に豆まきや恵方巻きを楽しむ日",
             "成人の日":"大人になった青年を祝い、励ます日",
             "建国記念の日":"建国をしのび、国を愛する心を養う日",
             "天皇誕生日":"天皇の誕生日を祝う日",
@@ -69,6 +83,7 @@ PanelWindow {
             "憲法記念日":"日本国憲法の施行を記念する日",
             "みどりの日":"自然に親しみ、その恩恵に感謝する日",
             "こどもの日":"子どもの幸福と成長を願い、母に感謝する日",
+            "ひな祭り":"女の子の健やかな成長と幸せを願う日",
             "海の日":"海の恩恵に感謝し、日本の繁栄を願う日",
             "山の日":"山に親しみ、山の恩恵に感謝する日",
             "敬老の日":"高齢者を敬い、長寿を祝う日",
@@ -81,10 +96,18 @@ PanelWindow {
             "バレンタインデー":"恋人や大切な人に気持ちを伝える日",
             "ホワイトデー":"バレンタインデーのお返しをする日",
             "七夕":"短冊に願いを書き、星に祈る日",
+            "お盆":"先祖を供養し、家族や故郷を思う時期",
             "ハロウィン":"仮装やお菓子を楽しむ行事",
+            "七五三":"子どもの成長を祝い、健やかな未来を願う行事",
             "クリスマス・イブ":"クリスマスの前夜。家族や友人と過ごす日",
             "クリスマス":"イエス・キリストの誕生を祝う日",
-            "大晦日":"一年の最後の日。新年を迎える準備をする日"
+            "大晦日":"一年の最後の日。新年を迎える準備をする日",
+            "三社祭":"浅草神社で行われる東京を代表する祭り",
+            "山王祭":"日枝神社で行われる江戸三大祭のひとつ",
+            "Vket 2026 Summer":"VRChat上で開催されるバーチャルマーケット",
+            "隅田川花火大会":"隅田川沿いで開催される東京の大規模な花火大会",
+            "コミックマーケット108":"東京ビッグサイトで開催される同人誌・創作物の大規模イベント",
+            "東京ゲームショウ2026":"ゲームの最新作や関連製品が集まる展示会"
         })
 
         function dateKey(day) {
@@ -96,20 +119,44 @@ PanelWindow {
             return holidays[dateKey(day)] || ""
         }
 
+        function observanceRangeName(day) {
+            var key = String(viewMonth + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0")
+            for (var i = 0; i < observanceRanges.length; i++) {
+                var range = observanceRanges[i]
+                if (key >= range.start && key <= range.end) return range.name
+            }
+            return ""
+        }
+
+        function tokyoEventName(day) {
+            var key = dateKey(day)
+            for (var i = 0; i < tokyoEvents.length; i++) {
+                var event = tokyoEvents[i]
+                if (key >= event.start && key <= event.end) return event.name
+            }
+            return ""
+        }
+
         function eventName(day) {
             if (day < 1) return ""
-            return holidayName(day) || observances[String(viewMonth + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0")] || ""
+            return holidayName(day) || observances[String(viewMonth + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0")] || observanceRangeName(day) || tokyoEventName(day)
         }
 
         function holidayType(day, name) {
-            if (!holidays[dateKey(day)]) return "文化・行事"
+            if (!holidays[dateKey(day)]) {
+                if (observanceRangeName(day) === name) return "期間イベント"
+                return tokyoEventName(day) === name ? "東京イベント" : "文化・行事"
+            }
             if (name === "振替休日") return "振替休日"
             if (name === "国民の休日") return "国民の休日"
             return "国民の祝日"
         }
 
         function holidayColor(day, name) {
-            if (!holidays[dateKey(day)]) return "#ba68c8"
+            if (!holidays[dateKey(day)]) {
+                if (observanceRangeName(day) === name) return "#64b5f6"
+                return tokyoEventName(day) === name ? "#4db6ac" : "#ba68c8"
+            }
             return name === "振替休日" || name === "国民の休日"
                 ? "#ffb74d" : "#e57373"
         }
