@@ -3,16 +3,14 @@
 // state/      AppState.qml        — global visibility flags + transient UI state
 // config/     Config.qml          — all paths (scripts, wallpaper, cache, etc.)
 // managers/   WallpaperManager, NotificationManager, RecordingManager, ScreenshotManager
-// system/     Dispatch, HttpClient, MprisHub — cross-cutting helpers
-// services/   AppProcesses.qml   — long-lived process wrappers (manga / video servers)
+// system/     Dispatch, MprisHub — cross-cutting helpers
+// services/   AppProcesses.qml   — application launcher process wrapper
 // parts/      LazyPanel, RecordButton, KbSection, TabButton, StyledText
 // panels/     All PanelWindow UIs
 // ipc/        ShellIpc.qml        — every IpcHandler in one place
 // scripts/    Non-QML assets invoked by managers / services
 //   screenshot/  screenshot.sh
 //   record/      record.sh
-//   manga/       manga-server (Go)
-//   video/       video-server, video-overrides.json (Go)
 //
 // Import rule: prefer the smallest folder that owns the type.
 // panels → state + managers + system  (not everything through one barrel)
@@ -36,9 +34,6 @@ ShellRoot {
     MusicPanel {}
     LauncherPanel {}
     Cheatsheet {}
-    MangaPanel {}
-    VideoPanel {}
-    ScreenTime {}
 
     // ── lazy overlay (wallpicker / menu) ──────────────────────────────────
     LazyPanel {

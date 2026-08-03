@@ -16,8 +16,6 @@ Singleton {
     readonly property string scriptsRoot:        configDir + "/scripts"
     readonly property string scriptScreenshot:   scriptsRoot + "/screenshot/screenshot.sh"
     readonly property string scriptRecord:       scriptsRoot + "/record/record.sh"
-    readonly property string scriptMangaServer:  scriptsRoot + "/manga/manga-server"
-    readonly property string scriptVideoServer:  scriptsRoot + "/video/video-server"
 
     // ── data files ────────────────────────────────────────────────────────
     readonly property string appUsageFile:  configDir + "/state/app_usage.json"

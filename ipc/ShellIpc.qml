@@ -8,11 +8,6 @@ import "../managers"
 // Add a new handler below whenever a new IPC target is needed.
 Item {
     IpcHandler {
-        target: "screentime"
-        function toggle() { AppState.screenTimeVisible = !AppState.screenTimeVisible }
-    }
-
-    IpcHandler {
         target: "launcher"
         function toggle() {
             AppState.activeTab       = 0
@@ -28,16 +23,6 @@ Item {
     IpcHandler {
         target: "music"
         function toggle() { AppState.musicVisible = !AppState.musicVisible }
-    }
-
-    IpcHandler {
-        target: "manga"
-        function toggle() { AppState.mangaVisible = !AppState.mangaVisible }
-    }
-
-    IpcHandler {
-        target: "video"
-        function toggle() { AppState.videoVisible = !AppState.videoVisible }
     }
 
     IpcHandler {

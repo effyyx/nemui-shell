@@ -11,9 +11,6 @@ Singleton {
     property bool wifiVisible:       false
     property bool btVisible:         false
     property bool cheatsheetVisible: false
-    property bool mangaVisible:      false
-    property bool videoVisible:      false
-    property bool screenTimeVisible: false
 
     // ── navigation ────────────────────────────────────────────────────────
     property int activeTab:        0
