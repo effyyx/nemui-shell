@@ -59,6 +59,31 @@ PanelWindow {
             return holidays[key] || ""
         }
 
+        function holidayType(name) {
+            if (name === "振替休日") return "振替休日"
+            if (name === "国民の休日") return "国民の休日"
+            return "国民の祝日"
+        }
+
+        function holidayColor(name) {
+            return name === "振替休日" || name === "国民の休日"
+                ? "#ffb74d" : "#e57373"
+        }
+
+        property var selectedHoliday: null
+        function showHoliday(cell) {
+            if (!cell.holiday) return
+            var p = cell.mapToItem(calRoot, 0, cell.height)
+            selectedHoliday = {
+                name: cell.holiday,
+                type: holidayType(cell.holiday),
+                date: viewYear + "年" + (viewMonth + 1) + "月" + cell.dayNum + "日"
+            }
+            holidayPopup.x = Math.max(8, Math.min(p.x, calRoot.width - holidayPopup.width - 8))
+            holidayPopup.y = Math.min(p.y, calRoot.height - holidayPopup.height - 8)
+            holidayPopup.open()
+        }
+
         // ── weather ───────────────────────────────────────────────────────
         property var    forecastDays:    []
         property double lastFetchTime:   0
@@ -173,6 +198,7 @@ PanelWindow {
                         width: calGrid.cellW; height: calGrid.cellW; radius: width / 2
                         property int  dayNum:  calGrid.days[index]
                         property string holiday: calRoot.holidayName(dayNum)
+                        property color holidayAccent: calRoot.holidayColor(holiday)
                         property bool isToday: dayNum > 0 && dayNum === calRoot.todayDay && calRoot.viewMonth === calRoot.todayMonth && calRoot.viewYear === calRoot.todayYear
                         color: isToday ? Qt.rgba(WallpaperManager.walColor5.r, WallpaperManager.walColor5.g, WallpaperManager.walColor5.b, 0.25) : "transparent"
                         border.color: isToday ? WallpaperManager.walColor5 : "transparent"; border.width: 1
@@ -180,7 +206,7 @@ PanelWindow {
                             anchors.centerIn: parent; text: dayNum > 0 ? dayNum : ""
                             anchors.verticalCenterOffset: parent.holiday ? -5 : 0
                             font.pixelSize: 13; font.family: "Hiragino Sans"; font.weight: parent.isToday ? Font.Bold : Font.Normal
-                            color: parent.isToday ? WallpaperManager.walColor5 : parent.holiday ? "#e57373" : WallpaperManager.walForeground
+                            color: parent.isToday ? WallpaperManager.walColor5 : parent.holiday ? parent.holidayAccent : WallpaperManager.walForeground
                         }
                         Text {
                             anchors { left: parent.left; right: parent.right; bottom: parent.bottom; bottomMargin: 2 }
@@ -188,8 +214,46 @@ PanelWindow {
                             horizontalAlignment: Text.AlignHCenter
                             elide: Text.ElideRight
                             font.pixelSize: 7; font.family: "Hiragino Sans"
-                            color: "#e57373"
+                            color: parent.holidayAccent
                         }
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: parent.holiday !== ""
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: calRoot.showHoliday(parent)
+                        }
+                    }
+                }
+            }
+
+            Popup {
+                id: holidayPopup
+                parent: calRoot
+                width: 200; height: 92
+                padding: 12
+                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                background: Rectangle {
+                    radius: 6
+                    color: Qt.rgba(WallpaperManager.walBackground.r, WallpaperManager.walBackground.g, WallpaperManager.walBackground.b, 0.98)
+                    border.width: 1
+                    border.color: WallpaperManager.walColor5
+                }
+                contentItem: Column {
+                    spacing: 4
+                    Text {
+                        text: calRoot.selectedHoliday ? calRoot.selectedHoliday.name : ""
+                        color: WallpaperManager.walForeground
+                        font.family: "Hiragino Sans"; font.pixelSize: 14; font.bold: true
+                    }
+                    Text {
+                        text: calRoot.selectedHoliday ? calRoot.selectedHoliday.type : ""
+                        color: WallpaperManager.walColor5
+                        font.family: "Hiragino Sans"; font.pixelSize: 10
+                    }
+                    Text {
+                        text: calRoot.selectedHoliday ? calRoot.selectedHoliday.date : ""
+                        color: WallpaperManager.walColor8
+                        font.family: "Hiragino Sans"; font.pixelSize: 10
                     }
                 }
             }
