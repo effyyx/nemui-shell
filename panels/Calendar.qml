@@ -53,6 +53,27 @@ PanelWindow {
             "2030-01-01":"元日", "2030-01-14":"成人の日", "2030-02-11":"建国記念の日", "2030-02-23":"天皇誕生日", "2030-03-20":"春分の日", "2030-04-29":"昭和の日", "2030-05-03":"憲法記念日", "2030-05-04":"みどりの日", "2030-05-05":"こどもの日", "2030-05-06":"振替休日", "2030-07-15":"海の日", "2030-08-11":"山の日", "2030-08-12":"振替休日", "2030-09-16":"敬老の日", "2030-09-23":"秋分の日", "2030-10-14":"スポーツの日", "2030-11-03":"文化の日", "2030-11-04":"振替休日", "2030-11-23":"勤労感謝の日"
         })
 
+        readonly property var holidayDescriptions: ({
+            "元日":"年のはじめを祝う日",
+            "成人の日":"大人になった青年を祝い、励ます日",
+            "建国記念の日":"建国をしのび、国を愛する心を養う日",
+            "天皇誕生日":"天皇の誕生日を祝う日",
+            "春分の日":"自然をたたえ、生物をいつくしむ日",
+            "昭和の日":"昭和の時代を振り返り、将来に思いをはせる日",
+            "憲法記念日":"日本国憲法の施行を記念する日",
+            "みどりの日":"自然に親しみ、その恩恵に感謝する日",
+            "こどもの日":"子どもの幸福と成長を願い、母に感謝する日",
+            "海の日":"海の恩恵に感謝し、日本の繁栄を願う日",
+            "山の日":"山に親しみ、山の恩恵に感謝する日",
+            "敬老の日":"高齢者を敬い、長寿を祝う日",
+            "秋分の日":"祖先を敬い、亡くなった人々をしのぶ日",
+            "スポーツの日":"スポーツを楽しみ、健康な心身を育む日",
+            "文化の日":"自由と平和を愛し、文化をすすめる日",
+            "勤労感謝の日":"勤労を尊び、生産を祝い、互いに感謝する日",
+            "振替休日":"日曜日の祝日の代わりに設けられる休日",
+            "国民の休日":"祝日に挟まれた平日に設けられる休日"
+        })
+
         function holidayName(day) {
             if (day < 1) return ""
             var key = viewYear + "-" + String(viewMonth + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0")
@@ -77,6 +98,7 @@ PanelWindow {
             selectedHoliday = {
                 name: cell.holiday,
                 type: holidayType(cell.holiday),
+                description: holidayDescriptions[cell.holiday] || "",
                 date: viewYear + "年" + (viewMonth + 1) + "月" + cell.dayNum + "日"
             }
             holidayPopup.x = Math.max(8, Math.min(p.x, calRoot.width - holidayPopup.width - 8))
@@ -229,7 +251,7 @@ PanelWindow {
             Popup {
                 id: holidayPopup
                 parent: calRoot
-                width: 200; height: 92
+                width: 200; height: 122
                 padding: 12
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
                 background: Rectangle {
@@ -249,6 +271,13 @@ PanelWindow {
                         text: calRoot.selectedHoliday ? calRoot.selectedHoliday.type : ""
                         color: WallpaperManager.walColor5
                         font.family: "Hiragino Sans"; font.pixelSize: 10
+                    }
+                    Text {
+                        width: parent.width
+                        text: calRoot.selectedHoliday ? calRoot.selectedHoliday.description : ""
+                        color: WallpaperManager.walForeground
+                        font.family: "Hiragino Sans"; font.pixelSize: 10
+                        wrapMode: Text.WordWrap
                     }
                     Text {
                         text: calRoot.selectedHoliday ? calRoot.selectedHoliday.date : ""
