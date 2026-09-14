@@ -1,4 +1,5 @@
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
@@ -8,6 +9,8 @@ import "../managers"
 import "../system"
 
 Scope {
+    property bool hyprlandBackend: Quickshell.env("XDG_CURRENT_DESKTOP") === "Hyprland"
+
     // ── niri workspace state via event-stream ─────────────────────────────
     property var    niriWorkspaces:    ({})
     property string niriFocusedOutput: ""
@@ -31,7 +34,7 @@ Scope {
     Process {
         id: niriEventProc
         command: ["niri", "msg", "-j", "event-stream"]
-        running: true
+        running: !hyprlandBackend
         stdout: SplitParser {
             onRead: data => {
                 var line = data.trim()
@@ -72,7 +75,7 @@ Scope {
                 } catch(e) {}
             }
         }
-        onExited: Qt.callLater(function() { niriEventProc.running = true })
+        onExited: Qt.callLater(function() { if (!hyprlandBackend) niriEventProc.running = true })
     }
 
     // ── one bar per screen ────────────────────────────────────────────────
@@ -92,14 +95,31 @@ Scope {
             readonly property string screenName: bar.screen ? bar.screen.name : ""
             readonly property var    wsLabels:   ["一","二","三","四","五","六","七","八","九","十"]
 
-            // Drop last (empty) workspace slot
             property var screenWorkspaces: {
+                if (hyprlandBackend) {
+                    var result = []
+                    var workspaces = Hyprland.workspaces.values
+                    for (var i = 0; i < workspaces.length; i++) {
+                        var workspace = workspaces[i]
+                        if (!workspace.monitor || workspace.monitor.name !== bar.screenName)
+                            continue
+
+                        var hasWindows = workspace.toplevels.values.length > 0
+                        if (workspace.active || hasWindows)
+                            result.push(workspace)
+                    }
+                    result.sort(function(a, b) { return a.id - b.id })
+                    return result
+                }
+
+                // Drop last (empty) workspace slot
                 var ws = niriWorkspaces[bar.screenName] || []
                 return ws.slice(0, ws.length - 1)
             }
 
             function wsToKanji(idx) {
-                return idx >= 1 && idx <= 10 ? wsLabels[idx - 1] : idx.toString()
+                var localIdx = idx > 5 ? idx - 5 : idx
+                return localIdx >= 1 && localIdx <= 5 ? wsLabels[localIdx - 1] : idx.toString()
             }
 
             Rectangle {
@@ -125,11 +145,12 @@ Scope {
                                 height: bar.implicitHeight
 
                                 property bool isActive: modelData.active
+                                property int workspaceIndex: hyprlandBackend ? modelData.id : modelData.idx
 
                                 Text {
                                     id: wsLabel
                                     anchors.centerIn: parent
-                                    text:           bar.wsToKanji(modelData.idx)
+                                    text:           bar.wsToKanji(workspaceIndex)
                                     color:          isActive ? WallpaperManager.walColor5 : WallpaperManager.walColor8
                                     opacity:        isActive ? 1.0 : 0.5
                                     font.pixelSize: 14; font.family: "Hiragino Sans"
@@ -149,9 +170,13 @@ Scope {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        var proc = Qt.createQmlObject('import Quickshell.Io; Process {}', bar)
-                                        proc.command = ["niri", "msg", "action", "focus-workspace", modelData.idx.toString()]
-                                        proc.running = true
+                                        if (hyprlandBackend) {
+                                            modelData.activate()
+                                        } else {
+                                            var proc = Qt.createQmlObject('import Quickshell.Io; Process {}', bar)
+                                            proc.command = ["niri", "msg", "action", "focus-workspace", workspaceIndex.toString()]
+                                            proc.running = true
+                                        }
                                     }
                                 }
                             }
