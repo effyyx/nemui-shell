@@ -70,7 +70,7 @@ Singleton {
         property string _liveImage:   notification ? notification.image   : ""
         property string _liveSummary: notification ? notification.summary : ""
 
-        Connections {
+        property Connections notificationConnections: Connections {
             target: notification
             function onClosed() {
                 // Quickshell image:// handles belong to the live notification.
