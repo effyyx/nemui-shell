@@ -30,10 +30,26 @@ ShellRoot {
     // ── persistent surfaces ───────────────────────────────────────────────
     Bar {}
     NotificationPopups {}
-    Calendar {}
-    MusicPanel {}
-    LauncherPanel {}
-    Cheatsheet {}
+
+    LazyPanel {
+        shown: AppState.dashboardVisible
+        panel: Component { Calendar {} }
+    }
+
+    LazyPanel {
+        shown: AppState.musicVisible
+        panel: Component { MusicPanel {} }
+    }
+
+    LazyPanel {
+        shown: AppState.launcherVisible
+        panel: Component { LauncherPanel {} }
+    }
+
+    LazyPanel {
+        shown: AppState.cheatsheetVisible
+        panel: Component { Cheatsheet {} }
+    }
 
     // ── lazy overlay (wallpicker / menu) ──────────────────────────────────
     LazyPanel {
