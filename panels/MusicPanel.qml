@@ -81,7 +81,8 @@ PanelWindow {
                     visible: MprisHub.hasTrack
 
                     Text {
-                        text:           MprisHub.player ? musicPanel.formatTime(MprisHub.player.position) : "0:00"
+                        text:           MprisHub.player && MprisHub.player.positionSupported
+                            ? musicPanel.formatTime(MprisHub.player.position) : "0:00"
                         color:          WallpaperManager.walColor8
                         font.pixelSize: 10; font.family: "Hiragino Sans"
                     }
@@ -91,7 +92,7 @@ PanelWindow {
                         color: Qt.rgba(0, 0, 0, 0.3)
 
                         Rectangle {
-                            width: MprisHub.player && MprisHub.player.length > 0
+                            width: MprisHub.player && MprisHub.player.positionSupported && MprisHub.player.length > 0
                                 ? parent.width * (MprisHub.player.position / MprisHub.player.length) : 0
                             height: parent.height; radius: 2
                             color: WallpaperManager.walColor5
@@ -101,14 +102,15 @@ PanelWindow {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             onClicked: function(mouse) {
-                                if (MprisHub.player && MprisHub.player.length > 0)
+                                if (MprisHub.player && MprisHub.player.canSeek && MprisHub.player.positionSupported && MprisHub.player.length > 0)
                                     MprisHub.player.position = (mouse.x / parent.width) * MprisHub.player.length
                             }
                         }
                     }
 
                     Text {
-                        text:           MprisHub.player ? musicPanel.formatTime(MprisHub.player.length) : "0:00"
+                        text:           MprisHub.player && MprisHub.player.lengthSupported
+                            ? musicPanel.formatTime(MprisHub.player.length) : "0:00"
                         color:          WallpaperManager.walColor8
                         font.pixelSize: 10; font.family: "Hiragino Sans"
                     }
@@ -172,6 +174,8 @@ PanelWindow {
         interval: 1000
         running:  AppState.musicVisible && MprisHub.isPlaying
         repeat:   true
-        onTriggered: { if (MprisHub.player) MprisHub.player.position }
+        onTriggered: {
+            if (MprisHub.player && MprisHub.player.positionSupported) MprisHub.player.position
+        }
     }
 }

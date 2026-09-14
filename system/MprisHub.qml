@@ -8,14 +8,21 @@ import QtQuick
 Singleton {
     id: root
 
+    function isUsable(p) {
+        return p && p.canControl && p.playbackState !== MprisPlaybackState.Stopped
+    }
+
     property MprisPlayer player: {
         var players = Mpris.players.values
         for (var i = 0; i < players.length; i++) {
             var p = players[i]
-            if (p.desktopEntry === "mpdris2" || p.identity === "Music Player Daemon")
+            if ((p.desktopEntry === "mpdris2" || p.identity === "Music Player Daemon") && p.canControl)
                 return p
         }
-        return players.length > 0 ? players[0] : null
+        for (var j = 0; j < players.length; j++) {
+            if (root.isUsable(players[j])) return players[j]
+        }
+        return null
     }
 
     readonly property string title:     player ? player.trackTitle  ?? "" : ""

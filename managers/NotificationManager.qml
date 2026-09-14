@@ -70,6 +70,16 @@ Singleton {
         property string _liveImage:   notification ? notification.image   : ""
         property string _liveSummary: notification ? notification.summary : ""
 
+        Connections {
+            target: notification
+            function onClosed() {
+                // Quickshell image:// handles belong to the live notification.
+                // Do not leave an expired handle in the popup model.
+                image = ""
+                notification = null
+            }
+        }
+
         on_LiveImageChanged: {
             if (_liveImage === "") return
             image = _liveImage

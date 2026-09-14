@@ -1,3 +1,4 @@
+import Quickshell
 import QtQuick
 
 // Loads its panel component lazily when `shown` becomes true,
@@ -10,11 +11,10 @@ Item {
     property int       destroyDelay: 200
     property Component panel
 
-    Loader {
+    LazyLoader {
         id: loader
-        asynchronous:    false
-        active:          root.shown || destroyTimer.running
-        sourceComponent: root.panel
+        active:    root.shown || destroyTimer.running
+        component: root.panel
     }
 
     Timer {
